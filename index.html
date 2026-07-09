@@ -213,6 +213,60 @@
       color: var(--text);
     }
 
+/* 💡 감정 분석 그래프 스타일 */
+    .chart-box {
+      margin: 0 18px 20px;
+      padding: 16px;
+      background: var(--neutral-bg);
+      border-radius: 8px;
+    }
+    .chart-box h3 {
+      margin: 0 0 12px;
+      font-size: 14px;
+      color: var(--text);
+    }
+    .chart-bar-container {
+      display: flex;
+      height: 24px;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #e4e7ec;
+    }
+    .chart-segment {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      transition: width 0.3s ease;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .chart-segment.pos { background: var(--positive); }
+    .chart-segment.neu { background: var(--neutral); }
+    .chart-segment.neg { background: var(--negative); }
+    
+    .chart-labels {
+      display: flex;
+      gap: 16px;
+      margin-top: 10px;
+      font-size: 13px;
+    }
+    .chart-label-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .chart-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .chart-dot.pos { background: var(--positive); }
+    .chart-dot.neu { background: var(--neutral); }
+    .chart-dot.neg { background: var(--negative); }
+
     .meta {
       display: flex;
       flex-wrap: wrap;
@@ -339,7 +393,8 @@
         margin-left: 0;
         width: 100%;
         display: gird;
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 8px;
       }
       .action-buttons button {
         width: 100%;
@@ -376,7 +431,7 @@
   <main>
     <div class="topbar">
       <div>
-        <h1>네이버 경제 뉴스 제목 수집</h1>
+        <h1>네이버 경제 뉴스 조회</h1>
         <p class="subtitle">날짜와 제목 조건을 선택하면 네이버 금융 경제 뉴스 제목을 가져와 감정 분석과 CSV 저장까지 처리합니다.</p>
       </div>
       <a class="source-link" href="https://finance.naver.com/news/news_list.naver?mode=LSS2D&section_id=101&section_id2=258" target="_blank" rel="noreferrer">네이버 금융 뉴스 열기</a>
@@ -397,6 +452,7 @@
           
           <!-- 버튼 그룹은 입력창 바로 옆에 위치 -->
           <div class="action-buttons">
+            <button id="resetAllButton" class="secondary" type="button">화면 초기화</button>
             <button id="resetInputsButton" class="secondary" type="button">입력 초기화</button>
             <button id="resetSelectedButton" class="secondary" type="button" disabled>선택 초기화</button>
             <button id="csvButton" class="secondary" type="button" disabled>CSV 저장</button>
@@ -436,8 +492,6 @@
         </div>
       </div>
 
-      <!-- 기존 하단 .actions 디브는 제거되었습니다 -->
-
       <div class="status">
         <span id="statusText">날짜를 고르고 뉴스 가져오기를 눌러주세요.</span>
         <span class="meta">
@@ -445,6 +499,23 @@
           <span>선택 <strong id="selectedText">0</strong>건</span>
         </span>
       </div>
+      <div id="errorBox" class="error" role="alert"></div>
+      
+      <!-- 감정 분석 그래프 영역 추가 (기본 숨김) -->
+      <div id="chartBox" class="chart-box" hidden>
+        <h3>감정 분석 비율</h3>
+        <div class="chart-bar-container">
+          <div id="chartPos" class="chart-segment pos" style="width: 0%"></div>
+          <div id="chartNeu" class="chart-segment neu" style="width: 0%"></div>
+          <div id="chartNeg" class="chart-segment neg" style="width: 0%"></div>
+        </div>
+        <div class="chart-labels">
+          <div class="chart-label-item"><span class="chart-dot pos"></span>긍정 <span id="labelPosCount">0건 (0%)</span></div>
+          <div class="chart-label-item"><span class="chart-dot neu"></span>중립 <span id="labelNeuCount">0건 (0%)</span></div>
+          <div class="chart-label-item"><span class="chart-dot neg"></span>부정 <span id="labelNegCount">0건 (0%)</span></div>
+        </div>
+      </div>
+
       <div id="errorBox" class="error" role="alert"></div>
 
       <div class="table-wrap" id="tableWrap" hidden>
@@ -497,6 +568,7 @@
     const csvButton = document.querySelector("#csvButton");
     const resetSelectedButton = document.querySelector("#resetSelectedButton");
     const resetInputsButton = document.querySelector("#resetInputsButton");
+    const resetAllButton = document.querySelector("#resetAllButton");
     const selectAllInput = document.querySelector("#selectAllInput");
     const statusText = document.querySelector("#statusText");
     const countText = document.querySelector("#countText");
@@ -505,6 +577,13 @@
     const resultBody = document.querySelector("#resultBody");
     const tableWrap = document.querySelector("#tableWrap");
     const emptyBox = document.querySelector("#emptyBox");
+    const chartBox = document.querySelector("#chartBox");
+    const chartPos = document.querySelector("#chartPos");
+    const chartNeu = document.querySelector("#chartNeu");
+    const chartNeg = document.querySelector("#chartNeg");
+    const labelPosCount = document.querySelector("#labelPosCount");
+    const labelNeuCount = document.querySelector("#labelNeuCount");
+    const labelNegCount = document.querySelector("#labelNegCount");
 
     dateInput.value = toDateInputValue(new Date());
 
@@ -512,6 +591,7 @@
     csvButton.addEventListener("click", downloadCsv);
     resetSelectedButton.addEventListener("click", resetSelectedRows);
     resetInputsButton.addEventListener("click", resetInputs);
+    resetAllButton.addEventListener("click", resetAll);
     selectAllInput.addEventListener("change", toggleAllRows);
     resultBody.addEventListener("change", handleRowSelection);
 
@@ -815,6 +895,42 @@
       csvButton.disabled = !hasRows;
       resetSelectedButton.disabled = state.selectedIds.size === 0;
       syncSelectAll();
+
+      if (hasRows) {
+        let posCount = 0;
+        let neuCount = 0;
+        let negCount = 0;
+
+        state.rows.forEach(row => {
+          if (row.sentiment.type === "positive") posCount++;
+          else if (row.sentiment.type === "neutral") neuCount++;
+          else if (row.sentiment.type === "negative") negCount++;
+        });
+
+        const total = state.rows.length;
+        const posPer = Math.round((posCount / total) * 100) || 0;
+        const neuPer = Math.round((neuCount / total) * 100) || 0;
+        const negPer = 100 - posPer - neuPer; // 합쳐서 100%가 되도록 보정
+
+        // 막대 너비 조정
+        chartPos.style.width = `${posPer}%`;
+        chartNeu.style.width = `${neuPer}%`;
+        chartNeg.style.width = `${negPer}%`;
+
+        // 막대 내부 텍스트 표시 (비율이 너무 작으면 글자가 안 보이게 0% 제외)
+        chartPos.textContent = posPer > 7 ? `${posPer}%` : "";
+        chartNeu.textContent = neuPer > 7 ? `${neuPer}%` : "";
+        chartNeg.textContent = negPer > 7 ? `${negPer}%` : "";
+
+        // 하단 상세 라벨 텍스트 변경
+        labelPosCount.textContent = `${posCount}건 (${posPer}%)`;
+        labelNeuCount.textContent = `${neuCount}건 (${neuPer}%)`;
+        labelNegCount.textContent = `${negCount}건 (${negPer}%)`;
+
+        chartBox.hidden = false; // 그래프 박스 보이기
+      } else {
+        chartBox.hidden = true;  // 데이터가 없으면 그래프 숨기기
+      }
     }
 
     function handleRowSelection(event) {
@@ -848,6 +964,19 @@
       renderRows();
     }
 
+    function resetAll() {
+      // 1. 입력 필드 전체 초기화 (기존 함수 재사용)
+      resetInputs();      
+      // 2. 내부 저장된 데이터 및 상태 초기화
+      state.rows = [];
+      state.selectedIds.clear();
+      state.selectedDate = "";      
+      // 3. 에러 박스 숨김 및 초기화
+      clearError();      
+      // 4. 화면의 데이터 표시(건수) 초기화 및 리렌더링
+      renderRows();
+    }
+
     function resetInputs() {
       // 1. 날짜를 오늘 날짜로 리셋
       dateInput.value = toDateInputValue(new Date());
@@ -863,6 +992,8 @@
       document.querySelector("#keywordInput5").value = "";  
       // 5. 안내 메시지도 처음 상태로 되돌립니다.
       statusText.textContent = "날짜를 고르고 뉴스 가져오기를 눌러주세요.";
+      // 💡 6. 그래프 상자도 숨김 처리합니다.
+      chartBox.hidden = true;
     }
 
     function syncSelectAll() {
