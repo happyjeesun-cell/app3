@@ -90,7 +90,7 @@
     .basic-settings {
       display: flex;
       gap: 15px; 
-      align-items: stretch; /* ◀ flex-end에서 stretch로 변경하여 인풋창 높이 고정 */
+      align-items: center; /* ◀ stretch에서 center로 변경하여 버튼 높이에 전염되지 않도록 수정 */
       width: 100%;
       flex-wrap: wrap;
     }
@@ -110,12 +110,19 @@
       margin: 0;
     }
 
+    /* 인풋 상자가 무조건 원래 지정된 높이(42px)를 유지하도록 강제 조절 */
+    .basic-settings .input-group input {
+      height: 42px;
+      box-sizing: border-box;
+    }
+
     /* 버튼들을 감싸는 영역 */
     .action-buttons {
       display: flex;
       gap: 10px;
       margin-left: auto; 
-      align-items: flex-end; /* ◀ 버튼들만 인풋창 아랫줄에 맞춰 정렬되도록 추가 */
+      align-items: center; /* ◀ 인풋창들과 부모 정렬축을 맞춤 */
+      padding-top: 20px;   /* ◀ 둘째줄의 문구들과 상단 라벨 높이를 시각적으로 맞춰주는 여백 추가 */
     }
 
     /* 두 번째 줄 (문구 조건 6개 항목) */
@@ -457,7 +464,7 @@
           <!-- 날짜 영역 -->
           <div class="input-group">
             <label for="dateInput">
-              <span style="color: #ff4d4f; font-weight: bold; margin-right: 2px;" aria-hidden="true">*</span> 날짜
+              <span style="color: #ff4d4f; font-weight: bold; margin-right: 2px;" aria-hidden="true">*!</span> 날짜
             </label>
             <input id="dateInput" type="date">
           </div>
