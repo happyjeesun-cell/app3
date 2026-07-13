@@ -86,24 +86,23 @@
       padding: 18px 18px 12px;
     }
 
-    /* 첫 번째 줄 (날짜, 페이지 + 버튼 그룹) */
+/* 첫 번째 줄 (날짜, 페이지 + 버튼 그룹) */
     .basic-settings {
       display: flex;
       gap: 15px; 
-      align-items: flex-end; /* 입력창과 버튼의 아랫줄을 맞춤 */
+      align-items: stretch; /* ◀ flex-end에서 stretch로 변경하여 인풋창 높이 고정 */
       width: 100%;
       flex-wrap: wrap;
     }
 
-    /* 글자+인풋 의 너비를 180px로 잡습니다 */
+    /* 새로 추가했던 input-group 스타일 */
     .basic-settings .input-group {
       display: flex;
-      flex-direction: column; /* 제목 아래에 인풋창이 오도록 배치 */
-      gap: 7px;               /* 제목과 인풋창 사이 간격 */
+      flex-direction: column; 
+      gap: 7px;               
       width: 180px; 
     }
 
-    /* 기본 설정 영역 안에 있는 label은 grid를 해제하고 한 줄로 정렬합니다 */
     .basic-settings .input-group label {
       display: flex;
       align-items: center;
@@ -115,7 +114,8 @@
     .action-buttons {
       display: flex;
       gap: 10px;
-      margin-left: auto; /* 입력창과 버튼 사이 여백 */
+      margin-left: auto; 
+      align-items: flex-end; /* ◀ 버튼들만 인풋창 아랫줄에 맞춰 정렬되도록 추가 */
     }
 
     /* 두 번째 줄 (문구 조건 6개 항목) */
