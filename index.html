@@ -95,8 +95,20 @@
       flex-wrap: wrap;
     }
 
-    .basic-settings label {
+    /* 글자+인풋 의 너비를 180px로 잡습니다 */
+    .basic-settings .input-group {
+      display: flex;
+      flex-direction: column; /* 제목 아래에 인풋창이 오도록 배치 */
+      gap: 7px;               /* 제목과 인풋창 사이 간격 */
       width: 180px; 
+    }
+
+    /* 기본 설정 영역 안에 있는 label은 grid를 해제하고 한 줄로 정렬합니다 */
+    .basic-settings .input-group label {
+      display: flex;
+      align-items: center;
+      width: auto;
+      margin: 0;
     }
 
     /* 버튼들을 감싸는 영역 */
@@ -445,7 +457,7 @@
           <!-- 날짜 영역 -->
           <div class="input-group">
             <label for="dateInput">
-              <span style="color: #ff4d4f; font-weight: bold; margin-right: 2px;" aria-hidden="true">*!</span> 날짜
+              <span style="color: #ff4d4f; font-weight: bold; margin-right: 2px;" aria-hidden="true">*</span> 날짜
             </label>
             <input id="dateInput" type="date">
           </div>
@@ -453,7 +465,7 @@
           <!-- 가져올 페이지 영역 -->
           <div class="input-group">
             <label for="pageInput">
-              <span style="color: #ff4d4f; font-weight: bold; margin-right: 2px;" aria-hidden="true">*</span> 가져올 페이지
+              <span style="color: #ff4d4f; font-weight: bold; margin-right: 2px;" aria-hidden="true">*!</span> 가져올 페이지
             </label>
             <input id="pageInput" type="number" min="1" max="50" value="3">
           </div>
